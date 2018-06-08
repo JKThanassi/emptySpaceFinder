@@ -108,3 +108,6 @@ venv.bak/
 
 #python notebooks
 *.ipynb
+
+#test datasets
+datasets/
