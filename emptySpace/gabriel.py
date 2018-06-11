@@ -35,6 +35,14 @@ class Gabriel:
             else:
                 pass
 
+        def remove_edge(self, toRemove):
+            """
+            This function will remove an edge from the two specified points
+            :param toRemove: the point to remove
+            :return: None
+            """
+            self.edges.remove(toRemove)
+
     def __init__(self, data):
         """Constructor for Gabriel class
         
@@ -52,6 +60,8 @@ class Gabriel:
 
         self.delaunay_graph = Delaunay(self.data)
         self.__generate_point_graph()
+        self.__prune_edges()
+
 
     def __generate_point_graph(self):
         """This function will generate a graph of points and their edges
@@ -70,9 +80,7 @@ class Gabriel:
                         self.point_graph[coord_idx].add_edge(point=self.point_graph[secondary_idx])
                         self.point_graph[secondary_idx].add_edge(point=self.point_graph[coord_idx])
                 ++pos_in_set
-        
 
-    
     def euclidian_distance(self, point1, point2):
         """This function provides the distance between two points
         
@@ -81,10 +89,35 @@ class Gabriel:
             point2 {array-like} -- array of coordinates describing the second point
         """
         sqr_diff_sum = 0
-        for idx in range(len(point1)):
-            sqr_diff_sum += (point1[idx] - point2[idx]) ** 2
+        for idx in range(len(point1.coordinates)):
+            # TODO fix
+            sqr_diff_sum += (point1.coordinates[idx] - point2.coordinates[idx]) ** 2
         return sqrt(sqr_diff_sum)
 
+    def __is_valid_edge(self, point1, point2):
+        diameter = self.euclidian_distance(point1,point2)
+        radius = diameter/2.0
+        x1 = point1.coordinates[0]
+        x2 = point2.coordinates[0]
+        y1 = point1.coordinates[1]
+        y2 = point2.coordinates[1]
+        center = self._point(-1, (((x1+x2)/2.0), ((y1+y2)/2.0)))
 
-    def is_valid_edge(self):
+        for point_key in self.point_graph.keys():
+            temp_point = self.point_graph[point_key]
+            if temp_point is not point1 and temp_point is not point2:
+                if self.euclidian_distance(center, temp_point) > radius:
+                    return False
+
+    def __prune_edges(self):
+        for key in self.point_graph.keys():
+            temp_point = self.point_graph[key]
+            for point in temp_point.edges:
+                if not self.__is_valid_edge(temp_point, point):
+                    temp_point.remove_edge(point)
+                    point.remove_edge(temp_point)
+                    print(
+                        f"edge from point:{temp_point.p_id} to point:{point.p_id} is invalid")
+
+    def plot(self):
         pass
