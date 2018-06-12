@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 import numpy as np
 from sklearn.manifold import MDS
 from sklearn.datasets import load_wine
@@ -14,7 +16,7 @@ def print_edges(gabriel):
 
 wine = load_wine()
 wine_data = wine.data
-wine_data = wine_data[0:10]
+#wine_data = wine_data[0:5]
 
 
 mds = MDS(n_components=2)
@@ -25,4 +27,5 @@ gab = Gabriel(data_scaled)
 gab.generate_gabriel()
 print(gab.delaunay_graph.simplices)
 print_edges(gab)
+gab.plot()
 

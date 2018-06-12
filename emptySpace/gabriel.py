@@ -1,5 +1,7 @@
 #Class for generating a gabriel graph from a dataset or delaunay triangulation
 #NOTE: this will apply only to 2d datasets and will eventually be extended to nd
+import matplotlib.pyplot as plt
+import matplotlib.lines as lines
 from scipy.spatial import Delaunay
 from math import sqrt
 class Gabriel:
@@ -79,7 +81,7 @@ class Gabriel:
                     elif coord_idx != secondary_idx:
                         self.point_graph[coord_idx].add_edge(point=self.point_graph[secondary_idx])
                         self.point_graph[secondary_idx].add_edge(point=self.point_graph[coord_idx])
-                ++pos_in_set
+                pos_in_set+=1
 
     def euclidian_distance(self, point1, point2):
         """This function provides the distance between two points
@@ -120,4 +122,22 @@ class Gabriel:
                         f"edge from point:{temp_point.p_id} to point:{point.p_id} is invalid")
 
     def plot(self):
-        pass
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        self.__plot_nodes(ax)
+        self.__plot_edges(ax)
+        plt.show()
+
+    def __plot_nodes(self, ax):
+        for key in self.point_graph.keys():
+            temp_point = self.point_graph[key]
+            ax.scatter(temp_point.coordinates[0], temp_point.coordinates[1], zorder=2)
+
+    def __plot_edges(self, ax):
+        # first generate lines
+        for key in self.point_graph.keys():
+            temp = self.point_graph[key]
+            for connecting_point in temp.edges:
+                x1,y1 = temp.coordinates
+                x2,y2 = connecting_point.coordinates
+                ax.plot([x1,x2],[y1,y2], zorder=1)
