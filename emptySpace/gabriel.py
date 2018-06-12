@@ -62,7 +62,7 @@ class Gabriel:
 
         self.delaunay_graph = Delaunay(self.data)
         self.__generate_point_graph()
-        self.__prune_edges()
+        #self.__prune_edges()
 
 
     def __generate_point_graph(self):
@@ -82,6 +82,7 @@ class Gabriel:
                         self.point_graph[coord_idx].add_edge(point=self.point_graph[secondary_idx])
                         self.point_graph[secondary_idx].add_edge(point=self.point_graph[coord_idx])
                 pos_in_set+=1
+
 
     def euclidian_distance(self, point1, point2):
         """This function provides the distance between two points
@@ -120,6 +121,13 @@ class Gabriel:
                     point.remove_edge(temp_point)
                     print(
                         f"edge from point:{temp_point.p_id} to point:{point.p_id} is invalid")
+
+    def __prune_edges_interactive(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        self.__plot_nodes(ax)
+        self.__plot_edges(ax)
+        #need to figure out how to remove specific Line2D objects
 
     def plot(self):
         fig = plt.figure()
