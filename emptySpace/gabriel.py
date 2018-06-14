@@ -129,12 +129,14 @@ class Gabriel:
         center = self._point(-1, (((x1 + x2) / 2.0), ((y1 + y2) / 2.0)))
         circle = Circle(center.coordinates, radius=radius, fill=False, linewidth=1, linestyle='solid')
         ax.add_artist(circle)
+        plt.draw()
         for point_key in self.point_graph.keys():
             temp_point = self.point_graph[point_key]
             if temp_point is not point1 and temp_point is not point2:
                 input("hit enter to move on")
                 if self.euclidian_distance(center, temp_point) > radius:
                     circle.remove()
+                    plt.draw()
                     return False
 
     def __prune_edges(self):
@@ -151,7 +153,7 @@ class Gabriel:
         ax = fig.add_subplot(111)
         self.__plot_nodes(ax)
         self.__plot_edges(ax)
-        plt.show()
+        plt.show(block=False)
         for key in self.point_graph.keys():
             temp_point = self.point_graph[key]
             for point in temp_point.edges:
@@ -159,6 +161,7 @@ class Gabriel:
                 x2, y2 = point.coordinates
                 if not self.__is_valid_edge_interactive(ax, temp_point, point):
                     temp_point.remove_edge(point)
+                    plt.draw()
 
     def plot(self):
         fig = plt.figure()
