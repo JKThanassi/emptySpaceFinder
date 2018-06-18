@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 from matplotlib.patches import Circle
-from scipy.spatial import Delaunay
+from scipy.spatial import Delaunay, distance
 from math import sqrt
 
 
@@ -50,7 +50,17 @@ class Gabriel:
             :param toRemove: the point to remove
             :return: None
             """
-            self.lines[self.edges.index(toRemove)].remove()
+            # TODO delete debug print statements
+            self_x, self_y = self.coordinates
+            toRemove_x, toRemove_y = toRemove.coordinates
+            for line in self.lines:
+                # TODO change so non 2d datasets are handled
+                line_x, line_y = line.get_data()
+                if (line_x[0] == self_x) and (line_x[1] == toRemove_x) and (line_y[0] == self_y) and (line_y[1] == toRemove_y):
+                    print(f"line from ({self_x}, {self_y}) to ({toRemove_x}, {toRemove_y}) has been removed")
+                    line.remove()
+                    del line
+                
             self.edges.remove(toRemove)
 
     def __init__(self, data):
@@ -95,21 +105,8 @@ class Gabriel:
                         self.point_graph[coord_idx].add_edge(point=self.point_graph[secondary_idx])
                 pos_in_set += 1
 
-    def euclidian_distance(self, point1, point2):
-        """This function provides the distance between two points
-        
-        Arguments:
-            point1 {array-like} -- array of coordinates describing the first point
-            point2 {array-like} -- array of coordinates describing the second point
-        """
-        sqr_diff_sum = 0
-        for idx in range(len(point1.coordinates)):
-            # TODO fix
-            sqr_diff_sum += (point1.coordinates[idx] - point2.coordinates[idx]) ** 2
-        return sqrt(sqr_diff_sum)
-
     def __is_valid_edge(self, point1, point2):
-        diameter = self.euclidian_distance(point1, point2)
+        diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
         x1, y1 = point1.coordinates
         x2, y2 = point2.coordinates
@@ -118,11 +115,11 @@ class Gabriel:
         for point_key in self.point_graph.keys():
             temp_point = self.point_graph[point_key]
             if temp_point is not point1 and temp_point is not point2:
-                if self.euclidian_distance(center, temp_point) > radius:
+                if distance.euclidean(center.coordinates, temp_point.coordinates) > radius:
                     return False
 
     def __is_valid_edge_interactive(self, ax, point1, point2):
-        diameter = self.euclidian_distance(point1, point2)
+        diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
         x1, y1 = point1.coordinates
         x2, y2 = point2.coordinates
@@ -134,7 +131,7 @@ class Gabriel:
             temp_point = self.point_graph[point_key]
             if temp_point is not point1 and temp_point is not point2:
                 input("hit enter to move on")
-                if self.euclidian_distance(center, temp_point) > radius:
+                if distance.euclidean(center.coordinates, temp_point.coordinates) > radius:
                     circle.remove()
                     plt.draw()
                     return False
@@ -160,6 +157,7 @@ class Gabriel:
                 x1, y1 = temp_point.coordinates
                 x2, y2 = point.coordinates
                 if not self.__is_valid_edge_interactive(ax, temp_point, point):
+                    print(f"removing edge from point {temp_point.coordinates} to {point.coordinates}")
                     temp_point.remove_edge(point)
                     plt.draw()
 
