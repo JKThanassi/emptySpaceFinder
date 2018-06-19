@@ -105,3 +105,12 @@ venv.bak/
 
 #visual studio code
 .vscode/
+
+#python notebooks
+*.ipynb
+
+#test datasets
+datasets/
+
+#intellij
+.idea/
