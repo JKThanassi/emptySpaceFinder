@@ -6,7 +6,7 @@ from sklearn.datasets import load_wine
 from emptySpace.gabriel import Gabriel
 from numpy import genfromtxt
 
-cars_data = genfromtxt("/home/joseph/Documents/emptySpaceFinder/datasets/cars.csv", delimiter=',', skip_header=1)
+cars_data = genfromtxt("../datasets/cars.csv", delimiter=',', skip_header=1)
 cars_data = cars_data[1:140, 3:5]
 print(cars_data)
 

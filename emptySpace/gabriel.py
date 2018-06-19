@@ -130,7 +130,8 @@ class Gabriel:
         for point_key in self.point_graph.keys():
             temp_point = self.point_graph[point_key]
             if temp_point is not point1 and temp_point is not point2:
-                input("hit enter to move on")
+                print("press a key to move on")
+                plt.waitforbuttonpress(timeout=-1)
                 if distance.euclidean(center.coordinates, temp_point.coordinates) > radius:
                     circle.remove()
                     plt.draw()
@@ -154,8 +155,6 @@ class Gabriel:
         for key in self.point_graph.keys():
             temp_point = self.point_graph[key]
             for point in temp_point.edges:
-                x1, y1 = temp_point.coordinates
-                x2, y2 = point.coordinates
                 if not self.__is_valid_edge_interactive(ax, temp_point, point):
                     print(f"removing edge from point {temp_point.coordinates} to {point.coordinates}")
                     temp_point.remove_edge(point)
