@@ -44,7 +44,7 @@ class Gabriel:
             else:
                 pass
 
-        def remove_edge(self, toRemove):
+        def remove_edge(self, toRemove, isInteractive=False):
             """
             This function will remove an edge from the two specified points
             :param toRemove: the point to remove
@@ -58,7 +58,9 @@ class Gabriel:
                 line_x, line_y = line.get_data()
                 if (line_x[0] == self_x) and (line_x[1] == toRemove_x) and (line_y[0] == self_y) and (line_y[1] == toRemove_y):
                     print(f"line from ({self_x}, {self_y}) to ({toRemove_x}, {toRemove_y}) has been removed")
-                    line.remove()
+                    if isInteractive:
+                        line.remove()
+                    self.lines.remove(line)
                     del line
                 
             self.edges.remove(toRemove)
@@ -84,7 +86,7 @@ class Gabriel:
         if interactive:
             self.__prune_edges_interactive()
         else:
-            # self.__prune_edges()
+            self.__prune_edges()
             pass
 
     def __generate_point_graph(self):
@@ -115,10 +117,25 @@ class Gabriel:
         for point_key in self.point_graph.keys():
             temp_point = self.point_graph[point_key]
             if temp_point is not point1 and temp_point is not point2:
-                if distance.euclidean(center.coordinates, temp_point.coordinates) > radius:
+                if distance.euclidean(center.coordinates, temp_point.coordinates) < radius:
                     return False
+        return True
 
     def __is_valid_edge_interactive(self, ax, point1, point2):
+        diameter = distance.euclidean(point1.coordinates, point2.coordinates)
+        radius = diameter / 2.0
+        x1, y1 = point1.coordinates
+        x2, y2 = point2.coordinates
+        center = self._point(-1, (((x1 + x2) / 2.0), ((y1 + y2) / 2.0)))
+        for point_key in self.point_graph.keys():
+            temp_point = self.point_graph[point_key]
+            if temp_point is not point1 and temp_point is not point2:
+                if distance.euclidean(center.coordinates, temp_point.coordinates) < radius:
+
+                    return False
+        return True
+
+    def __draw_circle(self, point1, point2, ax):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
         x1, y1 = point1.coordinates
@@ -127,15 +144,7 @@ class Gabriel:
         circle = Circle(center.coordinates, radius=radius, fill=False, linewidth=1, linestyle='solid')
         ax.add_artist(circle)
         plt.draw()
-        for point_key in self.point_graph.keys():
-            temp_point = self.point_graph[point_key]
-            if temp_point is not point1 and temp_point is not point2:
-                print("press a key to move on")
-                plt.waitforbuttonpress(timeout=-1)
-                if distance.euclidean(center.coordinates, temp_point.coordinates) > radius:
-                    circle.remove()
-                    plt.draw()
-                    return False
+        return circle;
 
     def __prune_edges(self):
         for key in self.point_graph.keys():
@@ -155,10 +164,14 @@ class Gabriel:
         for key in self.point_graph.keys():
             temp_point = self.point_graph[key]
             for point in temp_point.edges:
+                circle = self.__draw_circle(temp_point, point, ax)
+                while plt.waitforbuttonpress() is False:
+                    pass
                 if not self.__is_valid_edge_interactive(ax, temp_point, point):
                     print(f"removing edge from point {temp_point.coordinates} to {point.coordinates}")
-                    temp_point.remove_edge(point)
-                    plt.draw()
+                    temp_point.remove_edge(point, isInteractive=True)
+                circle.remove()
+                plt.draw()
 
     def plot(self):
         fig = plt.figure()
