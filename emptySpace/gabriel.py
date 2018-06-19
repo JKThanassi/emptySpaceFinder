@@ -7,7 +7,7 @@ from scipy.spatial import Delaunay, distance
 from math import sqrt
 
 
-class Gabriel:
+class Gabriel(object):
     class _point:
 
         def __init__(self, p_id, coordinates):
@@ -144,7 +144,7 @@ class Gabriel:
         circle = Circle(center.coordinates, radius=radius, fill=False, linewidth=1, linestyle='solid')
         ax.add_artist(circle)
         plt.draw()
-        return circle;
+        return circle
 
     def __prune_edges(self):
         for key in self.point_graph.keys():
