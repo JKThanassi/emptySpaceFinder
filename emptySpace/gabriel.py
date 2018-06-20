@@ -87,7 +87,6 @@ class Gabriel(object):
             self.__prune_edges_interactive()
         else:
             self.__prune_edges()
-            pass
 
     def __generate_point_graph(self):
         """This function will generate a graph of points and their edges
@@ -173,13 +172,16 @@ class Gabriel(object):
                 circle.remove()
                 plt.draw()
 
-    def plot(self):
+    def plot(self, editable_outside=False):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         self.__plot_nodes(ax)
         self.__plot_edges(ax)
-        plt.show()
-
+        if editable_outside:
+            return ax
+        else:
+            plt.show()
+        
     def __plot_nodes(self, ax):
         for key in self.point_graph.keys():
             temp_point = self.point_graph[key]
