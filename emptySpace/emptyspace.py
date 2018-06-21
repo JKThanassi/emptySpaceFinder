@@ -4,6 +4,12 @@ from emptySpace.gabriel import Gabriel
 
 class Empty_Space(object):
     def __init__(self, data):
+        """constructor for Empty_Space object
+        
+        Args:
+            data (ndarray): a numpy ndarray of data to be analyzed
+        """
+
         self.gabriel = Gabriel(data)
         self.gabriel.generate_gabriel()
         self.data = data

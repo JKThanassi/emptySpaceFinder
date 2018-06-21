@@ -35,20 +35,19 @@ class Gabriel(object):
                 self.edges.append(point)
                 x1, y1 = self.coordinates
                 x2, y2 = point.coordinates
+                #TODO remove the line2D from this
                 self.lines.append(lines.Line2D((x1, x2), (y1, y2), zorder=1))
 
             elif point is None and point_list is not None:
                 for point in point_list:
                     self.edges.append(point)
 
-            else:
-                pass
-
         def remove_edge(self, toRemove, isInteractive=False):
-            """
-            This function will remove an edge from the two specified points
-            :param toRemove: the point to remove
-            :return: None
+            """this function removes an edge from the edge list
+           
+            Args:
+                toRemove (_point): the point to be removed
+                isInteractive (bool, optional): Defaults to False. flag stating whether or not to remove the edge interactivley
             """
             # TODO delete debug print statements
             self_x, self_y = self.coordinates
@@ -66,15 +65,17 @@ class Gabriel(object):
             self.edges.remove(toRemove)
 
     def __init__(self, data):
-        """Constructor for Gabriel class
+        """Constructor for Gabriel Object
         
-        Arguments:
-            data {array-like} -- the data to generate a gabriel graph from
+        Args:
+            data (ndarray): numpy ndarray of data to be processed
         """
+
         self.data = data
         self.delaunay_graph = None
         self.visited_paths = dict()
         self.point_graph = dict()
+        self.n_dim = self.data.shape[1]
 
     def generate_gabriel(self, interactive=False):
         """This function will generate a gabriel graph from a set of data
@@ -106,17 +107,29 @@ class Gabriel(object):
                         self.point_graph[coord_idx].add_edge(point=self.point_graph[secondary_idx])
                 pos_in_set += 1
 
+    def __get_center(self, point1, point2):
+        """This function gets the center of the path between two points
+        
+        Args:
+            point1 (_point): the first endpoint of the path
+            point2 (_point): the second endpoint of the path
+
+        
+        """
+        center_coord_list = list()
+        for coord1, coord2 in zip(point1.coordinates, point2.coordinates):
+            center_coord_list.append(((coord1 + coord2) / 2.0)) 
+        return center_coord_list
+
     def __is_valid_edge(self, point1, point2):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        x1, y1 = point1.coordinates
-        x2, y2 = point2.coordinates
-        center = self._point(-1, (((x1 + x2) / 2.0), ((y1 + y2) / 2.0)))
+        center = self.__get_center(point1, point2)
 
         for point_key in self.point_graph.keys():
             temp_point = self.point_graph[point_key]
             if temp_point is not point1 and temp_point is not point2:
-                if distance.euclidean(center.coordinates, temp_point.coordinates) < radius:
+                if distance.euclidean(center, temp_point.coordinates) < radius:
                     return False
         return True
 
