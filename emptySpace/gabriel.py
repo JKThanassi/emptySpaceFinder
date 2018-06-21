@@ -69,12 +69,13 @@ class Gabriel(object):
         """Constructor for Gabriel class
         
         Arguments:
-            data {array-like} -- the data to generate a gabriel graph from
+            data {numpy.ndarray} -- the data to generate a gabriel graph from
         """
         self.data = data
         self.delaunay_graph = None
         self.visited_paths = dict()
         self.point_graph = dict()
+        self.n_dim = data.shape[1]
 
     def generate_gabriel(self, interactive=False):
         """This function will generate a gabriel graph from a set of data
