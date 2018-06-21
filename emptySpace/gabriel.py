@@ -7,7 +7,7 @@ from scipy.spatial import Delaunay, distance
 from math import sqrt
 
 
-class Gabriel:
+class Gabriel(object):
     class _point:
 
         def __init__(self, p_id, coordinates):
@@ -87,7 +87,6 @@ class Gabriel:
             self.__prune_edges_interactive()
         else:
             self.__prune_edges()
-            pass
 
     def __generate_point_graph(self):
         """This function will generate a graph of points and their edges
@@ -144,7 +143,7 @@ class Gabriel:
         circle = Circle(center.coordinates, radius=radius, fill=False, linewidth=1, linestyle='solid')
         ax.add_artist(circle)
         plt.draw()
-        return circle;
+        return circle
 
     def __prune_edges(self):
         for key in self.point_graph.keys():
@@ -173,13 +172,16 @@ class Gabriel:
                 circle.remove()
                 plt.draw()
 
-    def plot(self):
+    def plot(self, editable_outside=False):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         self.__plot_nodes(ax)
         self.__plot_edges(ax)
-        plt.show()
-
+        if editable_outside:
+            return ax
+        else:
+            plt.show()
+        
     def __plot_nodes(self, ax):
         for key in self.point_graph.keys():
             temp_point = self.point_graph[key]
