@@ -136,14 +136,11 @@ class Gabriel(object):
     def __is_valid_edge_interactive(self, ax, point1, point2):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        x1, y1 = point1.coordinates
-        x2, y2 = point2.coordinates
-        center = self._point(-1, (((x1 + x2) / 2.0), ((y1 + y2) / 2.0)))
+        center = self.__get_center(point1, point2)
         for point_key in self.point_graph.keys():
             temp_point = self.point_graph[point_key]
             if temp_point is not point1 and temp_point is not point2:
-                if distance.euclidean(center.coordinates, temp_point.coordinates) < radius:
-
+                if distance.euclidean(center, temp_point.coordinates) < radius:
                     return False
         return True
 
@@ -152,8 +149,8 @@ class Gabriel(object):
         radius = diameter / 2.0
         x1, y1 = point1.coordinates
         x2, y2 = point2.coordinates
-        center = self._point(-1, (((x1 + x2) / 2.0), ((y1 + y2) / 2.0)))
-        circle = Circle(center.coordinates, radius=radius, fill=False, linewidth=1, linestyle='solid')
+        center = self.__get_center(point1, point2)
+        circle = Circle(center, radius=radius, fill=False, linewidth=1, linestyle='solid')
         ax.add_artist(circle)
         plt.draw()
         return circle
