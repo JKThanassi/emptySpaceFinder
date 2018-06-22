@@ -16,10 +16,8 @@ class Empty_Space(object):
         self.ghost_points = list()
     
     def find_empty_space(self):
-        for key in self.gabriel.point_graph.keys():
-            temp_point = self.gabriel.point_graph[key]
+        for temp_point in self.gabriel.point_graph:
             for edge_point in temp_point.edges:
-                
                 center = self.__find_center(temp_point, edge_point)
                 self.ghost_points.append(center)
                 

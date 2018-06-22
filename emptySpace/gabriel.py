@@ -74,8 +74,8 @@ class Gabriel(object):
         self.data = data
         self.delaunay_graph = None
         self.visited_paths = dict()
-        self.point_graph = dict()
         self.n_dim = self.data.shape[1]
+        self.point_graph = list()
 
     def generate_gabriel(self, interactive=False):
         """This function will generate a gabriel graph from a set of data
@@ -94,7 +94,7 @@ class Gabriel(object):
         """
         # keys are the id of the point and the data is the point object
         for p_id in range(len(self.data)):
-            self.point_graph[p_id] = self._point(p_id, tuple(self.data[p_id]))
+            self.point_graph.append(self._point(p_id, tuple(self.data[p_id])))
 
         for coord_set in self.delaunay_graph.simplices:
             pos_in_set = 0
@@ -126,8 +126,7 @@ class Gabriel(object):
         radius = diameter / 2.0
         center = self.__get_center(point1, point2)
 
-        for point_key in self.point_graph.keys():
-            temp_point = self.point_graph[point_key]
+        for temp_point in self.point_graph:
             if temp_point is not point1 and temp_point is not point2:
                 if distance.euclidean(center, temp_point.coordinates) < radius:
                     return False
@@ -137,8 +136,7 @@ class Gabriel(object):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
         center = self.__get_center(point1, point2)
-        for point_key in self.point_graph.keys():
-            temp_point = self.point_graph[point_key]
+        for temp_point in self.point_graph:
             if temp_point is not point1 and temp_point is not point2:
                 if distance.euclidean(center, temp_point.coordinates) < radius:
                     return False
@@ -156,8 +154,7 @@ class Gabriel(object):
         return circle
 
     def __prune_edges(self):
-        for key in self.point_graph.keys():
-            temp_point = self.point_graph[key]
+        for temp_point in self.point_graph:
             for point in temp_point.edges:
                 if not self.__is_valid_edge(temp_point, point):
                     temp_point.remove_edge(point)
@@ -170,8 +167,7 @@ class Gabriel(object):
         self.__plot_nodes(ax)
         self.__plot_edges(ax)
         plt.show(block=False)
-        for key in self.point_graph.keys():
-            temp_point = self.point_graph[key]
+        for temp_point in self.point_graph:
             for point in temp_point.edges:
                 circle = self.__draw_circle(temp_point, point, ax)
                 while plt.waitforbuttonpress() is False:
@@ -193,13 +189,11 @@ class Gabriel(object):
             plt.show()
         
     def __plot_nodes(self, ax):
-        for key in self.point_graph.keys():
-            temp_point = self.point_graph[key]
+        for temp_point in self.point_graph:
             ax.scatter(temp_point.coordinates[0], temp_point.coordinates[1], zorder=2)
 
     def __plot_edges(self, ax):
         # first generate lines
-        for key in self.point_graph.keys():
-            temp = self.point_graph[key]
+        for temp in self.point_graph:
             for line in temp.lines:
                 ax.add_line(line)
