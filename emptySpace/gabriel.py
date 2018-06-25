@@ -1,7 +1,7 @@
 # Class for generating a gabriel graph from a dataset or delaunay triangulation
 # NOTE: this will apply only to 2d datasets and will eventually be extended to nd
 import matplotlib.pyplot as plt
-import matplotlib.lines as lines
+from mpl_toolkits import mplot3d
 from matplotlib.patches import Circle
 from scipy.spatial import Delaunay, distance
 from math import sqrt
@@ -21,7 +21,7 @@ class Gabriel(object):
             self.p_id = p_id
             self.coordinates = coordinates
             self.edges = list()
-            self.lines = list()
+            self.removed_edges = dict()
 
 
         def add_edge(self, point=None, point_list=None):
@@ -33,47 +33,32 @@ class Gabriel(object):
             """
             if point_list is None and point != None:
                 self.edges.append(point)
-                x1, y1 = self.coordinates
-                x2, y2 = point.coordinates
-                self.lines.append(lines.Line2D((x1, x2), (y1, y2), zorder=1))
-
+                self.removed_edges[point] = False
+                
             elif point is None and point_list is not None:
                 for point in point_list:
                     self.edges.append(point)
+                    self.removed_edges[point] = False
 
-            else:
-                pass
-
-        def remove_edge(self, toRemove, isInteractive=False):
-            """
-            This function will remove an edge from the two specified points
-            :param toRemove: the point to remove
-            :return: None
-            """
-            # TODO delete debug print statements
-            self_x, self_y = self.coordinates
-            toRemove_x, toRemove_y = toRemove.coordinates
-            for line in self.lines:
-                # TODO change so non 2d datasets are handled
-                line_x, line_y = line.get_data()
-                if (line_x[0] == self_x) and (line_x[1] == toRemove_x) and (line_y[0] == self_y) and (line_y[1] == toRemove_y):
-                    print(f"line from ({self_x}, {self_y}) to ({toRemove_x}, {toRemove_y}) has been removed")
-                    if isInteractive:
-                        line.remove()
-                    self.lines.remove(line)
-                    del line
-                
-            self.edges.remove(toRemove)
+        def remove_edge(self, toRemove):
+            """this function removes an edge from the edge list
+           
+            Args:
+                toRemove (_point): the point to be removed
+            """   
+            self.removed_edges[toRemove] = True
 
     def __init__(self, data):
-        """Constructor for Gabriel class
+        """Constructor for Gabriel Object
         
-        Arguments:
-            data {array-like} -- the data to generate a gabriel graph from
+        Args:
+            data (ndarray): numpy ndarray of data to be processed
         """
+
         self.data = data
         self.delaunay_graph = None
         self.visited_paths = dict()
+        self.n_dim = self.data.shape[1]
         self.point_graph = list()
 
     def generate_gabriel(self, interactive=False):
@@ -87,11 +72,12 @@ class Gabriel(object):
             self.__prune_edges_interactive()
         else:
             self.__prune_edges()
+            self.__remove_edges()
 
     def __generate_point_graph(self):
         """This function will generate a graph of points and their edges
         """
-        # keys are the id of the point and the data is the point object
+        # keys are the id of the point and the data is the _point object
         for p_id in range(len(self.data)):
             self.point_graph.append(self._point(p_id, tuple(self.data[p_id])))
 
@@ -106,38 +92,47 @@ class Gabriel(object):
                         self.point_graph[coord_idx].add_edge(point=self.point_graph[secondary_idx])
                 pos_in_set += 1
 
+    def get_center(self, point1, point2):
+        """This function gets the center of the path between two points
+        
+        Args:
+            point1 (_point): the first endpoint of the path
+            point2 (_point): the second endpoint of the path
+
+        
+        """
+        center_coord_list = list()
+        for coord1, coord2 in zip(point1.coordinates, point2.coordinates):
+            center_coord_list.append(((coord1 + coord2) / 2.0)) 
+        return center_coord_list
+
     def __is_valid_edge(self, point1, point2):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        x1, y1 = point1.coordinates
-        x2, y2 = point2.coordinates
-        center = self._point(-1, (((x1 + x2) / 2.0), ((y1 + y2) / 2.0)))
-
+        center = self.get_center(point1, point2)
         for temp_point in self.point_graph:
             if temp_point is not point1 and temp_point is not point2:
-                if distance.euclidean(center.coordinates, temp_point.coordinates) < radius:
+                if distance.euclidean(center, temp_point.coordinates) < radius:
                     return False
         return True
 
     def __is_valid_edge_interactive(self, ax, point1, point2):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        x1, y1 = point1.coordinates
-        x2, y2 = point2.coordinates
-        center = self._point(-1, (((x1 + x2) / 2.0), ((y1 + y2) / 2.0)))
+        center = self.get_center(point1, point2)
         for temp_point in self.point_graph:
             if temp_point is not point1 and temp_point is not point2:
-                if distance.euclidean(center.coordinates, temp_point.coordinates) < radius:
+                if distance.euclidean(center, temp_point.coordinates) < radius:
+                    print(f"edge from {point1.p_id} to {point2.p_id} is removed")
                     return False
+        print(f"edge from {point1.p_id} to {point2.p_id} is valid")
         return True
 
     def __draw_circle(self, point1, point2, ax):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        x1, y1 = point1.coordinates
-        x2, y2 = point2.coordinates
-        center = self._point(-1, (((x1 + x2) / 2.0), ((y1 + y2) / 2.0)))
-        circle = Circle(center.coordinates, radius=radius, fill=False, linewidth=1, linestyle='solid')
+        center = self.get_center(point1, point2)
+        circle = Circle(center, radius=radius, fill=False, linewidth=1, linestyle='solid')
         ax.add_artist(circle)
         plt.draw()
         return circle
@@ -163,26 +158,56 @@ class Gabriel(object):
                     pass
                 if not self.__is_valid_edge_interactive(ax, temp_point, point):
                     print(f"removing edge from point {temp_point.coordinates} to {point.coordinates}")
-                    temp_point.remove_edge(point, isInteractive=True)
+                    temp_point.remove_edge(point)
                 circle.remove()
                 plt.draw()
 
+    def __remove_edges(self):
+        """This function removes edges marked for removal
+        """
+        for point in self.point_graph:
+            point.edges[:] = [edge for edge in point.edges if not point.removed_edges[edge]]
+
+
     def plot(self, editable_outside=False):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        fig = None
+        ax = None
+        if self.n_dim > 3:
+            print("data must be 2-D or less to plot")
+            return
+        elif self.n_dim == 3:
+            fig = plt.figure
+            ax = plt.axes(projection='3d')
+        elif self.n_dim == 2:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+
         self.__plot_nodes(ax)
         self.__plot_edges(ax)
+
         if editable_outside:
             return ax
         else:
             plt.show()
         
     def __plot_nodes(self, ax):
-        for temp_point in self.point_graph:
-            ax.scatter(temp_point.coordinates[0], temp_point.coordinates[1], zorder=2)
+        if self.n_dim == 3:
+            for temp_point in self.point_graph:
+                ax.scatter3D(temp_point.coordinates[0], temp_point.coordinates[1], temp_point.coordinates[2])
+        elif self.n_dim ==2:
+            for temp_point in self.point_graph:
+                ax.scatter(temp_point.coordinates[0], temp_point.coordinates[1], zorder=2)
 
     def __plot_edges(self, ax):
-        # first generate lines
-        for temp in self.point_graph:
-            for line in temp.lines:
-                ax.add_line(line)
+        if self.n_dim == 2:
+            for temp in self.point_graph:
+                for edge in temp.edges:
+                    if not temp.removed_edges[edge]:
+                        xs, ys = zip(temp.coordinates, edge.coordinates)
+                        ax.plot(xs, ys, zorder=1)
+        if self.n_dim == 3:
+            for temp in self.point_graph:
+                for edge in temp.edges:
+                    if not temp.removed_edges[edge]:
+                        xs, ys, zs = zip(temp.coordinates, edge.coordinates)
+                        ax.plot(xs, ys, zs, zorder=1)
