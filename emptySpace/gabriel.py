@@ -21,6 +21,7 @@ class Gabriel(object):
             self.p_id = p_id
             self.coordinates = coordinates
             self.edges = list()
+            self.removed_edges = dict()
 
 
         def add_edge(self, point=None, point_list=None):
@@ -32,10 +33,12 @@ class Gabriel(object):
             """
             if point_list is None and point != None:
                 self.edges.append(point)
+                self.removed_edges[point] = False
                 
             elif point is None and point_list is not None:
                 for point in point_list:
                     self.edges.append(point)
+                    self.removed_edges[point] = False
 
         def remove_edge(self, toRemove):
             """this function removes an edge from the edge list
@@ -43,8 +46,7 @@ class Gabriel(object):
             Args:
                 toRemove (_point): the point to be removed
             """   
-            self.edges.remove(toRemove)
-            del toRemove
+            self.removed_edges[toRemove] = True
 
     def __init__(self, data):
         """Constructor for Gabriel Object
@@ -120,14 +122,14 @@ class Gabriel(object):
         for temp_point in self.point_graph:
             if temp_point is not point1 and temp_point is not point2:
                 if distance.euclidean(center, temp_point.coordinates) < radius:
+                    print(f"edge from {point1.p_id} to {point2.p_id} is removed")
                     return False
+        print(f"edge from {point1.p_id} to {point2.p_id} is valid")
         return True
 
     def __draw_circle(self, point1, point2, ax):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        x1, y1 = point1.coordinates
-        x2, y2 = point2.coordinates
         center = self.__get_center(point1, point2)
         circle = Circle(center, radius=radius, fill=False, linewidth=1, linestyle='solid')
         ax.add_artist(circle)
@@ -192,10 +194,12 @@ class Gabriel(object):
         if self.n_dim == 2:
             for temp in self.point_graph:
                 for edge in temp.edges:
-                    xs, ys = zip(temp.coordinates, edge.coordinates)
-                    ax.plot(xs, ys)
+                    if not temp.removed_edges[edge]:
+                        xs, ys = zip(temp.coordinates, edge.coordinates)
+                        ax.plot(xs, ys, zorder=1)
         if self.n_dim == 3:
             for temp in self.point_graph:
                 for edge in temp.edges:
-                    xs, ys, zs = zip(temp.coordinates, edge.coordinates)
-                    ax.plot(xs, ys, zs)
+                    if not temp.removed_edges[edge]:
+                        xs, ys, zs = zip(temp.coordinates, edge.coordinates)
+                        ax.plot(xs, ys, zs, zorder=1)
