@@ -6,15 +6,15 @@ from sklearn.datasets import load_wine
 from emptySpace.gabriel import Gabriel
 from numpy import genfromtxt
 
-cars_data = genfromtxt("../datasets/cars.csv", delimiter=',', skip_header=1)
+cars_data = genfromtxt("/home/joseph/Documents/emptySpaceFinder/datasets/cars.csv", delimiter=',', skip_header=1)
 cars_data = cars_data[1:140, 3:5]
 print(cars_data)
 
 
 def print_edges(gabriel):
-    for key in gabriel.point_graph.keys():
-        print(f"edges for {key} are :", end="")
-        for edge in gabriel.point_graph[key].edges:
+    for point in gabriel.point_graph:
+        print(f"edges for {point.p_id} are :", end="")
+        for edge in point.edges:
             print(f" {edge.p_id},", end="")
         print(" ")
 

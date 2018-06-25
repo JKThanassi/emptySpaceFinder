@@ -72,6 +72,7 @@ class Gabriel(object):
             self.__prune_edges_interactive()
         else:
             self.__prune_edges()
+            self.__remove_edges()
 
     def __generate_point_graph(self):
         """This function will generate a graph of points and their edges
@@ -91,7 +92,7 @@ class Gabriel(object):
                         self.point_graph[coord_idx].add_edge(point=self.point_graph[secondary_idx])
                 pos_in_set += 1
 
-    def __get_center(self, point1, point2):
+    def get_center(self, point1, point2):
         """This function gets the center of the path between two points
         
         Args:
@@ -108,7 +109,7 @@ class Gabriel(object):
     def __is_valid_edge(self, point1, point2):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        center = self.__get_center(point1, point2)
+        center = self.get_center(point1, point2)
         for temp_point in self.point_graph:
             if temp_point is not point1 and temp_point is not point2:
                 if distance.euclidean(center, temp_point.coordinates) < radius:
@@ -118,7 +119,7 @@ class Gabriel(object):
     def __is_valid_edge_interactive(self, ax, point1, point2):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        center = self.__get_center(point1, point2)
+        center = self.get_center(point1, point2)
         for temp_point in self.point_graph:
             if temp_point is not point1 and temp_point is not point2:
                 if distance.euclidean(center, temp_point.coordinates) < radius:
@@ -130,7 +131,7 @@ class Gabriel(object):
     def __draw_circle(self, point1, point2, ax):
         diameter = distance.euclidean(point1.coordinates, point2.coordinates)
         radius = diameter / 2.0
-        center = self.__get_center(point1, point2)
+        center = self.get_center(point1, point2)
         circle = Circle(center, radius=radius, fill=False, linewidth=1, linestyle='solid')
         ax.add_artist(circle)
         plt.draw()
@@ -160,6 +161,13 @@ class Gabriel(object):
                     temp_point.remove_edge(point)
                 circle.remove()
                 plt.draw()
+
+    def __remove_edges(self):
+        """This function removes edges marked for removal
+        """
+        for point in self.point_graph:
+            point.edges[:] = [edge for edge in point.edges if not point.removed_edges[edge]]
+
 
     def plot(self, editable_outside=False):
         fig = None
