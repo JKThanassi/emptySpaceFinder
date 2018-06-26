@@ -87,7 +87,7 @@ class Gabriel(object):
                 for secondary_idx in coord_set[pos_in_set + 1:]:
                     # graph will be a one way directed graph
                     if self.point_graph[secondary_idx] in self.point_graph[coord_idx].edges or self.point_graph[coord_idx] in self.point_graph[secondary_idx].edges:
-                        print(f"edge from point {coord_idx} to {secondary_idx} already exists ... skipping")
+                        pass
                     elif coord_idx != secondary_idx:
                         self.point_graph[coord_idx].add_edge(point=self.point_graph[secondary_idx])
                 pos_in_set += 1
@@ -142,8 +142,6 @@ class Gabriel(object):
             for point in temp_point.edges:
                 if not self.__is_valid_edge(temp_point, point):
                     temp_point.remove_edge(point)
-                    print(
-                        f"edge from point:{temp_point.p_id} to point:{point.p_id} is invalid")
 
     def __prune_edges_interactive(self):
         fig = plt.figure()
