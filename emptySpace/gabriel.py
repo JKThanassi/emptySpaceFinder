@@ -69,7 +69,12 @@ class Gabriel(object):
         self.delaunay_graph = Delaunay(self.data)
         self.__generate_point_graph()
         if interactive:
-            self.__prune_edges_interactive()
+            # TODO change this back
+            # self.__prune_edges_interactive()
+            self.plot()
+            self.__prune_edges()
+            self.__remove_edges()
+            self.plot()
         else:
             self.__prune_edges()
             self.__remove_edges()
