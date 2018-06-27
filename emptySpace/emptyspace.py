@@ -34,4 +34,5 @@ class Empty_Space(object):
         elif self.data.shape[1] == 3:
             ax = self.gabriel.plot(editable_outside=True)
             for coords in self.ghost_points:
-                ax.scatter(coords[0][0], coords[0][1], coords[0][2])
+                ax.scatter(coords[0][0], coords[0][1], coords[0][2], marker="*")
+            plt.show()
