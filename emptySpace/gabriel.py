@@ -117,7 +117,7 @@ class Gabriel(object):
         center = self.get_center(point1, point2)
         for temp_point in self.point_graph:
             if temp_point is not point1 and temp_point is not point2:
-                if distance.euclidean(center, temp_point.coordinates) < radius:
+                if distance.euclidean(center, temp_point.coordinates) <= radius:
                     return False
         return True
 
