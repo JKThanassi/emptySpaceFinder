@@ -7,7 +7,7 @@ from sklearn.metrics import silhouette_score
 from emptySpace.gabriel import Gabriel
 
 class Empty_Space(object):
-    def __init__(self, data):
+    def __init__(self, data, max_clusters):
         """constructor for Empty_Space object
         
         Args:
@@ -20,6 +20,7 @@ class Empty_Space(object):
         self.center_points = list()
         self.center_point_distances = list()
         self.ghost_points = list()
+        self.max_clusters = max_clusters
     
     def find_empty_space(self):
         for temp_point in self.gabriel.point_graph:
@@ -33,7 +34,7 @@ class Empty_Space(object):
     def cluster_close_points(self):
         # find the optimal number of clusters
         # TODO have some function of number of center points to determine max num of test points
-        km_list = [KMeans(n_clusters=i).fit(self.center_points) for i in range(2,20)]
+        km_list = [KMeans(n_clusters=i).fit(self.center_points) for i in range(2,self.max_clusters)]
         scores = [silhouette_score(self.center_points, km.predict(self.center_points)) for km in km_list]
         best_km_idx = np.argmax(scores)
         self.ghost_points = km_list[best_km_idx].cluster_centers_
