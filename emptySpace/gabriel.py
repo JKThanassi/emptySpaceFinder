@@ -179,7 +179,7 @@ class Gabriel(object):
             print("data must be 2-D or less to plot")
             return
         elif self.n_dim == 3:
-            fig = plt.figure
+            fig = plt.figure()
             ax = plt.axes(projection='3d')
         elif self.n_dim == 2:
             fig = plt.figure()

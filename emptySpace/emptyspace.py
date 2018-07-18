@@ -43,7 +43,25 @@ class Empty_Space(object):
 
 
     def scale(self):
-        mds = MDS(n_components=self.dim_to_scale)
+        mds_data = MDS(n_components=self.dim_to_scale)
+        mds_ghost = MDS(n_components=self.dim_to_scale)
+        
+        scaled_data = mds_data.fit_transform(self.data)
+        scaled_ghost = mds_ghost.fit_transform(self.ghost_points)
+
+        print(scaled_data)
+        print("ghost")
+        print(scaled_ghost)
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        [ax.scatter(point[0], point[1], color='green') for point in scaled_data]
+        [ax.scatter(point[0], point[1], color='red') for point in scaled_ghost]
+        [ax.scatter(point[0], point[1], color='green', marker='x') for point in self.data]
+        [ax.scatter(point[0], point[1], color='red', marker='x') for point in self.ghost_points]
+        fig.show()
+
+
 
 
     def plot(self):
