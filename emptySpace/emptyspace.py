@@ -44,8 +44,7 @@ class Empty_Space(object):
 
     def scale(self):
         mds = MDS(n_components=self.dim_to_scale)
-        data = np.copy(self.data)
-        data.append(np.copy(self.ghost_points))
+        data = np.concatenate((np.copy(self.data), np.copy(self.ghost_points)))
         scaled_data = mds.fit_transform(data)
 
         scaled_ghost = scaled_data[len(self.data) : ]
@@ -63,4 +62,11 @@ class Empty_Space(object):
             ax = self.gabriel.plot(editable_outside=True)
             for coords in self.ghost_points:
                 ax.scatter(coords[0], coords[1], coords[2], marker="*")
+            plt.show()
+
+    def plot_scaled(self, scaled_data, scaled_ghost):
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            [ax.scatter(data_point[0], data_point[1], c='red', marker='o') for data_point in scaled_data]
+            [ax.scatter(ghost_point[0], ghost_point[1], c='blue', marker='x') for ghost_point in scaled_ghost]
             plt.show()
