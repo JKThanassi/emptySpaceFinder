@@ -21,6 +21,7 @@ class Empty_Space(object):
         self.center_points = list()
         self.center_point_distances = list()
         self.ghost_points = list()
+        self.ghost_point_avg_dist = list()
         self.max_clusters = max_clusters
         self.dim_to_scale = dim_to_scale
     
@@ -33,13 +34,28 @@ class Empty_Space(object):
                 self.center_point_distances.append(dist)
         self.cluster_close_points()
 
+    def __get_avg_cluster_distance(self, best_km):
+        self.ghost_point_avg_dist = [0] * best_km.n_clusters
+        labels = best_km.labels_
+        num_points_per_cluster = [0] * best_km.n_clusters
+
+        for label in labels:
+            num_points_per_cluster[label] += 1
+
+        for idx in range(0, len(self.center_points)):
+            self.ghost_point_avg_dist[labels[idx]] += self.center_point_distances[idx]
+        
+        for idx in range(0, len(self.ghost_point_avg_dist)):
+            self.ghost_point_avg_dist[idx] = self.ghost_point_avg_dist[idx] / float(num_points_per_cluster[idx])
+
+
     def cluster_close_points(self):
         # find the optimal number of clusters
         km_list = [KMeans(n_clusters=i, n_jobs=-1).fit(self.center_points) for i in range(2,self.max_clusters)]
         scores = [silhouette_score(self.center_points, km.predict(self.center_points)) for km in km_list]
         best_km_idx = np.argmax(scores)
         self.ghost_points = km_list[best_km_idx].cluster_centers_
-
+        self.__get_avg_cluster_distance(km_list[best_km_idx])
 
     def scale(self):
         mds = MDS(n_components=self.dim_to_scale)
