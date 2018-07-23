@@ -36,7 +36,7 @@ class Empty_Space(object):
     def cluster_close_points(self):
         # find the optimal number of clusters
         # TODO have some function of number of center points to determine max num of test points
-        km_list = [KMeans(n_clusters=i).fit(self.center_points) for i in range(2,self.max_clusters)]
+        km_list = [KMeans(n_clusters=i, n_jobs=-1).fit(self.center_points) for i in range(2,self.max_clusters)]
         scores = [silhouette_score(self.center_points, km.predict(self.center_points)) for km in km_list]
         best_km_idx = np.argmax(scores)
         self.ghost_points = km_list[best_km_idx].cluster_centers_
