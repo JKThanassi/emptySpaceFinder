@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial import distance
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
@@ -65,23 +63,3 @@ class Empty_Space(object):
         scaled_ghost = scaled_data[len(self.data) : ]
         return_scaled_data = scaled_data[:len(self.data)]
         return return_scaled_data, scaled_ghost
-
-
-    def plot(self):
-        if self.data.shape[1] == 2: 
-            ax = self.gabriel.plot(editable_outside=True)
-            for coord_pair in self.ghost_points:
-                ax.scatter(coord_pair[0], coord_pair[1], marker="*")
-            plt.show()
-        elif self.data.shape[1] == 3:
-            ax = self.gabriel.plot(editable_outside=True)
-            for coords in self.ghost_points:
-                ax.scatter(coords[0], coords[1], coords[2], marker="*")
-            plt.show()
-
-    def plot_scaled(self, scaled_data, scaled_ghost):
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-            [ax.scatter(data_point[0], data_point[1], c='red', marker='o') for data_point in scaled_data]
-            [ax.scatter(ghost_point[0], ghost_point[1], c='blue', marker='x') for ghost_point in scaled_ghost]
-            plt.show()
