@@ -4,10 +4,11 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.spatial import distance
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from sklearn.manifold import MDS
 from emptySpace.gabriel import Gabriel
 
 class Empty_Space(object):
-    def __init__(self, data, max_clusters):
+    def __init__(self, data, max_clusters, dim_to_scale):
         """constructor for Empty_Space object
         
         Args:
@@ -21,6 +22,7 @@ class Empty_Space(object):
         self.center_point_distances = list()
         self.ghost_points = list()
         self.max_clusters = max_clusters
+        self.dim_to_scale = dim_to_scale
     
     def find_empty_space(self):
         for temp_point in self.gabriel.point_graph:
@@ -33,11 +35,20 @@ class Empty_Space(object):
 
     def cluster_close_points(self):
         # find the optimal number of clusters
-        # TODO have some function of number of center points to determine max num of test points
-        km_list = [KMeans(n_clusters=i).fit(self.center_points) for i in range(2,self.max_clusters)]
+        km_list = [KMeans(n_clusters=i, n_jobs=-1).fit(self.center_points) for i in range(2,self.max_clusters)]
         scores = [silhouette_score(self.center_points, km.predict(self.center_points)) for km in km_list]
         best_km_idx = np.argmax(scores)
         self.ghost_points = km_list[best_km_idx].cluster_centers_
+
+
+    def scale(self):
+        mds = MDS(n_components=self.dim_to_scale)
+        data = np.concatenate((np.copy(self.data), np.copy(self.ghost_points)))
+        scaled_data = mds.fit_transform(data)
+
+        scaled_ghost = scaled_data[len(self.data) : ]
+        return_scaled_data = scaled_data[:len(self.data)]
+        return return_scaled_data, scaled_ghost
 
 
     def plot(self):
@@ -50,4 +61,11 @@ class Empty_Space(object):
             ax = self.gabriel.plot(editable_outside=True)
             for coords in self.ghost_points:
                 ax.scatter(coords[0], coords[1], coords[2], marker="*")
+            plt.show()
+
+    def plot_scaled(self, scaled_data, scaled_ghost):
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            [ax.scatter(data_point[0], data_point[1], c='red', marker='o') for data_point in scaled_data]
+            [ax.scatter(ghost_point[0], ghost_point[1], c='blue', marker='x') for ghost_point in scaled_ghost]
             plt.show()
