@@ -114,3 +114,6 @@ datasets/
 
 #intellij
 .idea/
+
+#NODE
+node_modules/
