@@ -111,17 +111,6 @@ class Gabriel(object):
                     return False
         return True
 
-   
-
-    def __draw_circle(self, point1, point2, ax):
-        diameter = distance.euclidean(point1.coordinates, point2.coordinates)
-        radius = diameter / 2.0
-        center = self.get_center(point1, point2)
-        circle = Circle(center, radius=radius, fill=False, linewidth=1, linestyle='solid')
-        ax.add_artist(circle)
-        plt.draw()
-        return circle
-
     def __prune_edges(self):
         for temp_point in self.point_graph:
             for point in temp_point.edges:

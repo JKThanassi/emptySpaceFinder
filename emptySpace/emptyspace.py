@@ -62,4 +62,4 @@ class Empty_Space(object):
 
         scaled_ghost = scaled_data[len(self.data) : ]
         return_scaled_data = scaled_data[:len(self.data)]
-        return return_scaled_data, scaled_ghost
+        return return_scaled_data.tolist(), scaled_ghost.tolist()
