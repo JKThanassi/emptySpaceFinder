@@ -34,7 +34,7 @@ class Empty_Space(object):
                 self.center_point_distances.append(dist)
         self.cluster_close_points()
 
-    def __get_avg_cluster_distance(self, best_km):
+    def __get_avg_cluster_distance(self, best_km, centers, center_distances):
         self.ghost_point_avg_dist = [0] * best_km.n_clusters
         labels = best_km.labels_
         num_points_per_cluster = [0] * best_km.n_clusters
@@ -42,8 +42,8 @@ class Empty_Space(object):
         for label in labels:
             num_points_per_cluster[label] += 1
 
-        for idx in range(0, len(self.center_points)):
-            self.ghost_point_avg_dist[labels[idx]] += self.center_point_distances[idx]
+        for idx in range(0, len(centers)):
+            self.ghost_point_avg_dist[labels[idx]] += center_distances[idx]
         
         for idx in range(0, len(self.ghost_point_avg_dist)):
             self.ghost_point_avg_dist[idx] = self.ghost_point_avg_dist[idx] / float(num_points_per_cluster[idx])
@@ -51,11 +51,20 @@ class Empty_Space(object):
 
     def cluster_close_points(self):
         # find the optimal number of clusters
-        km_list = [KMeans(n_clusters=i, n_jobs=-1).fit(self.center_points) for i in range(2,self.max_clusters)]
-        scores = [silhouette_score(self.center_points, km.predict(self.center_points)) for km in km_list]
+        selected_centers, selected_center_dists = self.choose_center_points()
+        km_list = [KMeans(n_clusters=i, n_jobs=-1).fit(selected_centers) for i in range(2,self.max_clusters)]
+        scores = [silhouette_score(selected_centers, km.predict(selected_centers)) for km in km_list]
         best_km_idx = np.argmax(scores)
         self.ghost_points = km_list[best_km_idx].cluster_centers_
-        self.__get_avg_cluster_distance(km_list[best_km_idx])
+        self.__get_avg_cluster_distance(km_list[best_km_idx], selected_centers, selected_center_dists)
+
+    def choose_center_points(self):
+        mean_dist = np.mean(self.center_point_distances)
+        std = np.std(self.center_point_distances)
+        std_greater_than_mean = mean_dist + std
+        larger_centers = [self.center_points[idx] for idx, dist in enumerate(self.center_point_distances) if dist > std_greater_than_mean]
+        larger_center_dists = [dist for dist in self.center_point_distances if dist > std_greater_than_mean]
+        return larger_centers, larger_center_dists
 
     def scale(self):
         mds = MDS(n_components=self.dim_to_scale)
