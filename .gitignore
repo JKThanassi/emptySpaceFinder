@@ -115,5 +115,8 @@ datasets/
 #intellij
 .idea/
 
-#node
+#NODE
 node_modules/
+#plots
+*.png
+.DS_Store
