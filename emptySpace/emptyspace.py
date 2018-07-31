@@ -72,3 +72,15 @@ class Empty_Space(object):
         scaled_ghost = scaled_data[len(self.data) : ]
         return_scaled_data = scaled_data[:len(self.data)]
         return return_scaled_data.tolist(), scaled_ghost.tolist()
+
+    def toReactVisFormat(self, data):
+        """This function returns a list with data formatted for a react-vis chart
+        
+        Args:
+            data (ndarray): the data to re-format
+        """
+        rv_list = list()
+        for coord_set in data:
+            rv_list.append({'x':coord_set[0], 'y':coord_set[1]})
+        return rv_list
+        
