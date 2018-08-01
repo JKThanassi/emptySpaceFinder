@@ -16,10 +16,10 @@ def gen_empty_space():
         es = Empty_Space(np.asarray(data), n_clusters, 2)
         es.find_empty_space()
         scaled_data, scaled_centers = es.scale()
-        toReturn = {'scaled_data':es.toReactVisFormat(scaled_data), 'scaled_centers':es.toReactVisFormat(scaled_centers)}
+        toReturn = {'scaled_data':es.toReactVisFormat(scaled_data), 'scaled_centers':es.toReactVisFormat(scaled_centers, es.ghost_point_avg_dist)}
         return jsonify(toReturn)
 
 @app.route("/")
-def home():
+def home(): 
     return "Site to come"
 

@@ -1,20 +1,22 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import DataSubmissionForm from './components/dataSubmissionForm'
+import EsGraph from './components/graphComponent'
 
 class App extends Component {
+  constructor(props){
+    super(props);
+    this.state = {children:[<DataSubmissionForm key={0} handleSubmit={this.handleSubmit}/>, <EsGraph key={1} data={[{x:1,y:0, size:5}, {x:3, y:4, size:2}]}/>]}
+  
+  }
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">Empty Space Finder</h1>
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        <DataSubmissionForm/>
+        {this.state.children}
       </div>
     );
   }

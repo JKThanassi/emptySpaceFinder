@@ -11,10 +11,13 @@ class DataSubmissionForm extends Component {
         this.handleTxtChange = this.handleTxtChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
-
+    
     handleSubmit(event){
         console.log(this.state.txtValue);
         console.log(this.state.inputValue);
+        let bodyObj = {data:this.state.inputValue, max_clusters:this.state.inputValue}
+        let bodyJson = JSON.stringify(bodyObj)
+        const esRequest = new Request('http://127.0.0.1:5000/es/v1/find_es', {method:'POST', body:bodyJson})
     }
 
     handleTxtChange(event){
@@ -32,7 +35,7 @@ class DataSubmissionForm extends Component {
                     <textarea value={this.state.txtValue} onChange={this.handleTxtChange}/>
                     <input name="max clusters" type="number" value={this.state.inputValue} onChange={this.handleInputChange}/>
                 </form>
-                <button onClick={this.handleSubmit}>Submit Data</button>
+                <button onClick={this.props.handleSubmit}>Submit Data</button>
             </div>
         );
     }
