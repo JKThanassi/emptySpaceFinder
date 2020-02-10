@@ -1,7 +1,5 @@
 # Class for generating a gabriel graph from a dataset or delaunay triangulation
 # NOTE: this will apply only to 2d datasets and will eventually be extended to nd
-import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
 from matplotlib.patches import Circle
 from scipy.spatial import Delaunay, distance
 from math import sqrt
@@ -68,16 +66,8 @@ class Gabriel(object):
 
         self.delaunay_graph = Delaunay(self.data)
         self.__generate_point_graph()
-        if interactive:
-            # TODO change this back
-            # self.__prune_edges_interactive()
-            self.plot()
-            self.__prune_edges()
-            self.__remove_edges()
-            self.plot()
-        else:
-            self.__prune_edges()
-            self.__remove_edges()
+        self.__prune_edges()
+        self.__remove_edges()
 
     def __generate_point_graph(self):
         """This function will generate a graph of points and their edges
@@ -121,49 +111,12 @@ class Gabriel(object):
                     return False
         return True
 
-    def __is_valid_edge_interactive(self, ax, point1, point2):
-        diameter = distance.euclidean(point1.coordinates, point2.coordinates)
-        radius = diameter / 2.0
-        center = self.get_center(point1, point2)
-        for temp_point in self.point_graph:
-            if temp_point is not point1 and temp_point is not point2:
-                if distance.euclidean(center, temp_point.coordinates) < radius:
-                    print(f"edge from {point1.p_id} to {point2.p_id} is removed")
-                    return False
-        print(f"edge from {point1.p_id} to {point2.p_id} is valid")
-        return True
-
-    def __draw_circle(self, point1, point2, ax):
-        diameter = distance.euclidean(point1.coordinates, point2.coordinates)
-        radius = diameter / 2.0
-        center = self.get_center(point1, point2)
-        circle = Circle(center, radius=radius, fill=False, linewidth=1, linestyle='solid')
-        ax.add_artist(circle)
-        plt.draw()
-        return circle
-
     def __prune_edges(self):
         for temp_point in self.point_graph:
             for point in temp_point.edges:
                 if not self.__is_valid_edge(temp_point, point):
                     temp_point.remove_edge(point)
 
-    def __prune_edges_interactive(self):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        self.__plot_nodes(ax)
-        self.__plot_edges(ax)
-        plt.show(block=False)
-        for temp_point in self.point_graph:
-            for point in temp_point.edges:
-                circle = self.__draw_circle(temp_point, point, ax)
-                while plt.waitforbuttonpress() is False:
-                    pass
-                if not self.__is_valid_edge_interactive(ax, temp_point, point):
-                    print(f"removing edge from point {temp_point.coordinates} to {point.coordinates}")
-                    temp_point.remove_edge(point)
-                circle.remove()
-                plt.draw()
 
     def __remove_edges(self):
         """This function removes edges marked for removal
@@ -171,46 +124,3 @@ class Gabriel(object):
         for point in self.point_graph:
             point.edges[:] = [edge for edge in point.edges if not point.removed_edges[edge]]
 
-
-    def plot(self, editable_outside=False):
-        fig = None
-        ax = None
-        if self.n_dim > 3:
-            print("data must be 2-D or less to plot")
-            return
-        elif self.n_dim == 3:
-            fig = plt.figure()
-            ax = plt.axes(projection='3d')
-        elif self.n_dim == 2:
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-
-        self.__plot_nodes(ax)
-        self.__plot_edges(ax)
-
-        if editable_outside:
-            return ax
-        else:
-            plt.show()
-        
-    def __plot_nodes(self, ax):
-        if self.n_dim == 3:
-            for temp_point in self.point_graph:
-                ax.scatter3D(temp_point.coordinates[0], temp_point.coordinates[1], temp_point.coordinates[2])
-        elif self.n_dim ==2:
-            for temp_point in self.point_graph:
-                ax.scatter(temp_point.coordinates[0], temp_point.coordinates[1], zorder=2)
-
-    def __plot_edges(self, ax):
-        if self.n_dim == 2:
-            for temp in self.point_graph:
-                for edge in temp.edges:
-                    if not temp.removed_edges[edge]:
-                        xs, ys = zip(temp.coordinates, edge.coordinates)
-                        ax.plot(xs, ys, zorder=1)
-        if self.n_dim == 3:
-            for temp in self.point_graph:
-                for edge in temp.edges:
-                    if not temp.removed_edges[edge]:
-                        xs, ys, zs = zip(temp.coordinates, edge.coordinates)
-                        ax.plot(xs, ys, zs, zorder=1)
